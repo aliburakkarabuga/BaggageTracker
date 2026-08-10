@@ -1,0 +1,13 @@
+{
+  "name": "bagaj-takip-hardware-bridge",
+  "version": "0.1.0",
+  "description": "Arduino/HC-SR04 seri port köprüsü — backend'e sensör event'i gönderir",
+  "main": "bridge.js",
+  "scripts": {
+    "start": "node bridge.js"
+  },
+  "dependencies": {
+    "@serialport/parser-readline": "^12.0.0",
+    "serialport": "^12.0.0"
+  }
+}

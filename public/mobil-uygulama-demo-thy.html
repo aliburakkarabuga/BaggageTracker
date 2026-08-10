@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mobil Uygulama Demo — Havayolu Teması</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+
+  :root {
+    --bg: #eef1f5;
+    --phone: #111417;
+    --screen: #fbf9f5;
+    --maroon: #6e1423;
+    --maroon-deep: #4a0d18;
+    --gold: #c9a24b;
+    --gold-bg: #fbf3df;
+    --ink: #241a17;
+    --muted: #8a7d74;
+    --line: #e7e0d5;
+    --green: #3f7d5c;
+    --green-bg: #e9f3ec;
+    --soft-alert: #a85327;
+    --soft-alert-bg: #fbeee3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 60px;
+    color: var(--ink);
+  }
+  .page-title { font-size: 13px; color: var(--muted); margin-bottom: 22px; text-align: center; }
+
+  .phone {
+    width: 320px;
+    height: 660px;
+    background: var(--phone);
+    border-radius: 46px;
+    padding: 14px;
+    box-shadow: 0 30px 60px rgba(17,20,23,0.28), 0 4px 14px rgba(17,20,23,0.12);
+    position: relative;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 14px; left: 50%; transform: translateX(-50%);
+    width: 110px; height: 22px;
+    background: var(--phone);
+    border-radius: 0 0 16px 16px;
+    z-index: 5;
+  }
+  .screen {
+    width: 100%; height: 100%;
+    background: var(--screen);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .statusbar {
+    height: 30px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 22px;
+    font-size: 12px; font-weight: 600;
+    flex-shrink: 0;
+    color: #f6ece9;
+    background: var(--maroon);
+  }
+  .screen-body { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .screen-body::-webkit-scrollbar { display: none; }
+
+  /* ---- Ekran 1: Uçuşum ---- */
+  #screen-flight { display: flex; flex-direction: column; height: 100%; }
+  .flight-topband {
+    background: linear-gradient(160deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+    padding: 16px 18px 46px;
+    color: #f6ece9;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .flight-topband::after {
+    content: "";
+    position: absolute; right: -30px; top: -30px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .flight-topband .app-name {
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    opacity: 0.75; margin-bottom: 10px; position: relative; z-index: 1;
+  }
+  .flight-topband .route {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 24px; font-weight: 600;
+    position: relative; z-index: 1;
+  }
+  .flight-topband .route .arrow { font-size: 14px; opacity: 0.6; }
+  .flight-topband .sub { font-size: 12px; opacity: 0.75; margin-top: 4px; position: relative; z-index: 1; }
+
+  .boarding-card {
+    margin: -32px 16px 14px;
+    background: var(--screen);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(74,13,24,0.18);
+    border: 1px solid var(--line);
+    padding: 16px 16px 14px;
+    position: relative;
+    z-index: 2;
+  }
+  .boarding-card .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .boarding-card .k { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .boarding-card .v { font-size: 14.5px; font-weight: 700; margin-top: 3px; }
+  .boarding-card .v.accent { color: var(--maroon); }
+
+  .menu { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 13px; border-radius: 12px;
+    background: #ffffff; border: 1px solid var(--line);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+  }
+  .menu-item .emoji { font-size: 15px; }
+  .menu-item .chev { margin-left: auto; color: var(--muted); }
+
+  /* ---- Alt navigasyon ---- */
+  .bottom-nav {
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: #ffffff;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 9px 4px 11px;
+    font-size: 9px;
+    color: var(--muted);
+    cursor: pointer;
+    position: relative;
+  }
+  .nav-item .nav-emoji { font-size: 16px; }
+  .nav-item.active { color: var(--maroon); font-weight: 700; }
+  .nav-item.highlight { color: var(--maroon); font-weight: 700; }
+  .nav-item .badge-new {
+    position: absolute;
+    top: 2px; right: 16px;
+    background: var(--gold);
+    color: #fff;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 1.5px 4px;
+    border-radius: 5px;
+    letter-spacing: 0.03em;
+  }
+
+  /* ---- Ekran 2: Bagaj takip ---- */
+  #screen-bag { display: none; flex-direction: column; height: 100%; }
+  .bag-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: var(--maroon);
+    color: #f6ece9;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px;
+  }
+  .bag-header .title { font-size: 13.5px; font-weight: 700; }
+
+  .demo-panel {
+    margin: 10px 16px 6px;
+    padding: 8px 10px;
+    background: #fafafa;
+    border: 1px dashed var(--line);
+    border-radius: 10px;
+    font-size: 10px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .demo-panel select {
+    width: 100%; margin-top: 4px; padding: 5px;
+    font-size: 11px; border-radius: 6px; border: 1px solid var(--line);
+  }
+
+  .bag-content { padding: 8px 16px 16px; flex: 1; overflow-y: auto; }
+
+  .banner {
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;
+    font-size: 11px; line-height: 1.4; display: flex; gap: 8px;
+  }
+  .banner.priority { background: var(--gold-bg); color: #7a5a15; }
+  .banner.success { background: var(--green-bg); color: #2b5c41; }
+  .banner.soft-alert { background: var(--soft-alert-bg); color: var(--soft-alert); }
+
+  .bag-card {
+    background: #ffffff; border: 1px solid var(--line); border-radius: 14px; padding: 15px;
+  }
+  .bag-card .tag { font-size: 10px; color: var(--muted); }
+  .bag-card .name { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 600; margin: 2px 0 14px; }
+
+  .journey { display: flex; align-items: flex-start; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step .dot {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: #ece5d8; border: 2px solid var(--line); margin: 0 auto 6px; position: relative; z-index: 2;
+  }
+  .step.done .dot { background: var(--maroon); border-color: var(--maroon); }
+  .step.current .dot { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 3px var(--green-bg); }
+  .step .line {
+    position: absolute; top: 5px; left: -50%; width: 100%; height: 2px;
+    background: var(--line); z-index: 1;
+  }
+  .step:first-child .line { display: none; }
+  .step.done .line, .step.current .line { background: var(--maroon); }
+  .step .label { font-size: 9px; color: var(--muted); }
+  .step.done .label, .step.current .label { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="page-title">Mobil Uygulama Demo (havayolu teması) — genel yerleşim/renk paleti referans alınmıştır, gerçek marka öğesi kullanılmamıştır</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="statusbar">
+        <span>9:41</span>
+        <span>●●● 5G 🔋</span>
+      </div>
+
+      <div class="screen-body">
+        <!-- ---- Ekran 1: Uçuşum ---- -->
+        <div id="screen-flight">
+          <div class="flight-topband">
+            <div class="app-name">Uçuşum</div>
+            <div class="route"><span>IST</span><span class="arrow">✈ 2s 40d</span><span>ESB</span></div>
+            <div class="sub">TK1982 · Bugün 14:20</div>
+          </div>
+
+          <div class="boarding-card">
+            <div class="grid">
+              <div><div class="k">Kapı</div><div class="v accent">C14</div></div>
+              <div><div class="k">Koltuk</div><div class="v">14A</div></div>
+              <div><div class="k">Durum</div><div class="v">Zamanında</div></div>
+            </div>
+          </div>
+
+          <div class="menu">
+            <div class="menu-item"><span class="emoji">🎫</span><span>Biniş Kartı</span><span class="chev">›</span></div>
+            <div class="menu-item"><span class="emoji">🪑</span><span>Koltuk Değiştir</span><span class="chev">›</span></div>
+            <div class="menu-item"><span class="emoji">🍽️</span><span>İkram Seçimi</span><span class="chev">›</span></div>
+          </div>
+
+          <div class="bottom-nav">
+            <div class="nav-item active"><span class="nav-emoji">🏠</span><span>Ana Sayfa</span></div>
+            <div class="nav-item"><span class="nav-emoji">🎫</span><span>Uçuş Durumu</span></div>
+            <div class="nav-item"><span class="nav-emoji">🛄</span><span>Bagaj Bırakma</span></div>
+            <div class="nav-item highlight" onclick="showScreen('bag')">
+              <span class="badge-new">YENİ</span>
+              <span class="nav-emoji">🧳</span><span>Bagajım Nerede?</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---- Ekran 2: Bagaj takip ---- -->
+        <div id="screen-bag">
+          <div class="bag-header">
+            <div class="back-btn" onclick="showScreen('flight')">←</div>
+            <div class="title">Bagajım Nerede?</div>
+          </div>
+
+          <div class="demo-panel">
+            demo: bagaj seç
+            <select id="bag-select"></select>
+          </div>
+
+          <div class="bag-content" id="bag-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API_KEY = "demo-havayolu-key-123";
+  const CHECKPOINTS = ["check-in", "sorting", "loading", "arrival-unload", "carousel"];
+  const CHECKPOINT_LABELS = {
+    "check-in": "Check-in", "sorting": "Ayrıştırma", "loading": "Yükleme",
+    "arrival-unload": "İniş", "carousel": "Bant",
+  };
+  const SOFT_ALERT_MESSAGES = {
+    MISROUTED: "Bagajınızın rotasında küçük bir sapma tespit edildi, ekibimiz takip ediyor.",
+    MANUAL_FLAG: "Bagajınız ekibimiz tarafından özel olarak inceleniyor, endişelenmeyin.",
+  };
+
+  let bags = {};
+  let selectedTagId = null;
+
+  function showScreen(name) {
+    document.getElementById("screen-flight").style.display = name === "flight" ? "flex" : "none";
+    document.getElementById("screen-bag").style.display = name === "bag" ? "flex" : "none";
+  }
+  window.showScreen = showScreen;
+
+  function renderJourney(bag) {
+    const currentIdx = bag.checkpoint ? CHECKPOINTS.indexOf(bag.checkpoint) : -1;
+    return CHECKPOINTS.map((cp, i) => {
+      let cls = "step";
+      if (i < currentIdx) cls += " done";
+      else if (i === currentIdx) cls += " done current";
+      return `<div class="${cls}"><div class="line"></div><div class="dot"></div><div class="label">${CHECKPOINT_LABELS[cp]}</div></div>`;
+    }).join("");
+  }
+
+  function renderBanners(bag) {
+    let html = "";
+    if (bag.priority) {
+      html += `<div class="banner priority"><span>⭐</span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli işleniyor.</span></div>`;
+    }
+    if (bag.alerts.some((a) => a.type === "SLA_MET")) {
+      html += `<div class="banner success"><span>✅</span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
+    }
+    const critical = [...bag.alerts].reverse().find((a) => ["MISROUTED", "MANUAL_FLAG"].includes(a.type));
+    if (critical) {
+      html += `<div class="banner soft-alert"><span>💬</span><span>${SOFT_ALERT_MESSAGES[critical.type]}</span></div>`;
+    }
+    return html;
+  }
+
+  function renderBag(bag) {
+    document.getElementById("bag-content").innerHTML = `
+      ${renderBanners(bag)}
+      <div class="bag-card">
+        <div class="tag">${bag.tagId} · ${bag.flightId}</div>
+        <div class="name">${bag.passenger}</div>
+        <div class="journey">${renderJourney(bag)}</div>
+      </div>
+    `;
+  }
+
+  function populateSelect() {
+    const sorted = Object.values(bags).sort((a, b) => a.tagId.localeCompare(b.tagId));
+    const sel = document.getElementById("bag-select");
+    sel.innerHTML = sorted.map((b) => `<option value="${b.tagId}">${b.tagId} — ${b.passenger}</option>`).join("");
+    if (sorted.length) {
+      selectedTagId = sorted[0].tagId;
+      sel.value = selectedTagId;
+      renderBag(bags[selectedTagId]);
+    }
+    sel.onchange = () => { selectedTagId = sel.value; renderBag(bags[selectedTagId]); };
+  }
+
+  async function loadInitialBags() {
+    const res = await fetch("/api/bags", { headers: { "x-api-key": API_KEY } });
+    const list = await res.json();
+    bags = Object.fromEntries(list.map((b) => [b.tagId, b]));
+    populateSelect();
+  }
+
+  function connectWebSocket() {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${location.host}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "event") {
+        bags[msg.bag.tagId] = msg.bag;
+        if (msg.bag.tagId === selectedTagId) renderBag(msg.bag);
+      } else if (msg.type === "reset") {
+        loadInitialBags();
+      }
+    };
+    ws.onclose = () => setTimeout(connectWebSocket, 2000);
+  }
+
+  loadInitialBags();
+  connectWebSocket();
+</script>
+</body>
+</html>
