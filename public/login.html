@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Giriş — Bagaj Takip Operasyon Paneli</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #131a23;
+    --border: #263241;
+    --text: #e6edf3;
+    --muted: #7d8a9a;
+    --accent: #3b82f6;
+    --danger: #f85149;
+    --danger-bg: rgba(248, 81, 73, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 0%, #10161f 0%, var(--bg) 60%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+  }
+  .card {
+    width: 100%;
+    max-width: 360px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+  .brand-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), #1d4ed8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+  }
+  h1 {
+    font-size: 17px;
+    margin: 0;
+    font-weight: 600;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 4px 0 26px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #0d1319;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--accent); }
+  button {
+    width: 100%;
+    margin-top: 24px;
+    padding: 11px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  button:hover { background: #2563eb; }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .error {
+    display: none;
+    margin-top: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--danger-bg);
+    border: 1px solid rgba(248, 81, 73, 0.35);
+    color: var(--danger);
+    font-size: 13px;
+  }
+  .demo-note {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="brand-icon">🧳</div>
+      <h1>Bagaj Takip</h1>
+    </div>
+    <p class="subtitle">Operasyon paneline giriş yapın</p>
+
+    <form id="login-form">
+      <label for="username">Kullanıcı adı</label>
+      <input id="username" name="username" type="text" autocomplete="username" required />
+
+      <label for="password">Şifre</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+
+      <div id="error" class="error"></div>
+
+      <button id="submit-btn" type="submit">Giriş yap</button>
+    </form>
+
+    <p class="demo-note">DEMO — operasyon / demo1234</p>
+  </div>
+
+  <script>
+    const form = document.getElementById("login-form");
+    const errorBox = document.getElementById("error");
+    const submitBtn = document.getElementById("submit-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorBox.style.display = "none";
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Giriş yapılıyor…";
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const res = await fetch("/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
+
+        if (res.ok) {
+          window.location.href = "/dashboard.html";
+          return;
+        }
+
+        const body = await res.json().catch(() => ({}));
+        errorBox.textContent = body.error || "Kullanıcı adı veya şifre hatalı.";
+        errorBox.style.display = "block";
+      } catch (err) {
+        errorBox.textContent = "Sunucuya bağlanılamadı. Backend çalışıyor mu?";
+        errorBox.style.display = "block";
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Giriş yap";
+      }
+    });
+  </script>
+</body>
+</html>

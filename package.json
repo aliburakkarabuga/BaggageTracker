@@ -1,0 +1,15 @@
+{
+  "name": "bagaj-takip-sistemi",
+  "version": "0.1.0",
+  "description": "Havalimanı bagaj takip sistemi — pitch demo (Node.js + Express + WebSocket)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "sim": "node sensor-simulator.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}

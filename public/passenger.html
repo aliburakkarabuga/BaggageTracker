@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bagajım Nerede?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap');
+
+  :root {
+    --maroon: #6e1423;
+    --maroon-deep: #4a0d18;
+    --maroon-light: #8c2035;
+    --gold: #c9a24b;
+    --gold-light: #e8d29e;
+    --paper: #fbf9f5;
+    --paper-2: #f3efe6;
+    --ink: #241a17;
+    --muted: #8a7d74;
+    --line: #e4dcd0;
+    --green: #3f7d5c;
+    --green-bg: #e9f3ec;
+    --soft-alert: #a85327;
+    --soft-alert-bg: #fbeee3;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--maroon-deep);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(255,255,255,0.05), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(255,255,255,0.04), transparent 45%);
+    font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--ink);
+    display: flex;
+    justify-content: center;
+    padding: 0 0 48px;
+  }
+  .wrap { width: 100%; max-width: 430px; }
+
+  /* ---- Üst bant ---- */
+  .topband {
+    background: linear-gradient(160deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+    padding: 22px 22px 30px;
+    color: #f6ece9;
+    position: relative;
+    overflow: hidden;
+  }
+  .topband::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    top: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .topband-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+  }
+  .brandmark {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .brandmark .glyph {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .brandmark .name {
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .badge-live {
+    font-size: 10.5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    letter-spacing: 0.04em;
+  }
+  .topband h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 25px;
+    margin: 20px 0 3px;
+    position: relative;
+    z-index: 1;
+  }
+  .topband p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.75;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- Bagaj seçici ---- */
+  .selector-wrap {
+    margin: -16px 16px 0;
+    position: relative;
+    z-index: 2;
+  }
+  .selector {
+    background: var(--paper);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 26px rgba(74, 13, 24, 0.28);
+    border: 1px solid var(--line);
+  }
+  .selector label {
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .selector select {
+    width: 100%;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font-size: 14.5px;
+    font-weight: 600;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .content { padding: 18px 16px 0; }
+
+  /* ---- Banner'lar ---- */
+  .banner {
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+  }
+  .banner .icon { font-size: 16px; line-height: 1; }
+  .banner.priority { background: #fbf4e4; color: #7a5a15; border: 1px solid var(--gold-light); }
+  .banner.success { background: var(--green-bg); color: #2b5c41; border: 1px solid #c7e4d4; }
+  .banner.soft-alert { background: var(--soft-alert-bg); color: var(--soft-alert); border: 1px solid #f0d2bd; }
+
+  /* ---- Biniş kartı stili ana kart ---- */
+  .pass {
+    background: var(--paper);
+    border-radius: 16px;
+    box-shadow: 0 14px 36px rgba(74, 13, 24, 0.14);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .pass-top {
+    padding: 20px 20px 16px;
+  }
+  .pass-tag {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    margin-bottom: 3px;
+  }
+  .pass-name {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .pass-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .pass-field .k {
+    font-size: 9.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 4px;
+  }
+  .pass-field .v {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .pass-field.gold .v { color: var(--maroon); }
+
+  /* ---- Perforasyon / ayraç ---- */
+  .perforation {
+    position: relative;
+    height: 0;
+    border-top: 1.5px dashed var(--line);
+    margin: 4px 0;
+  }
+  .perforation::before, .perforation::after {
+    content: "";
+    position: absolute;
+    top: -9px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--maroon-deep);
+  }
+  .perforation::before { left: -9px; }
+  .perforation::after { right: -9px; }
+
+  /* ---- Yolculuk / checkpoint ---- */
+  .journey-wrap { padding: 20px 20px 8px; }
+  .journey-label {
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 16px;
+  }
+  .journey { display: flex; align-items: flex-start; }
+  .step { flex: 1; text-align: center; position: relative; }
+  .step .dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--paper-2);
+    border: 2px solid var(--line);
+    margin: 0 auto 8px;
+    position: relative;
+    z-index: 2;
+  }
+  .step.done .dot { background: var(--maroon); border-color: var(--maroon); }
+  .step.current .dot { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 4px var(--green-bg); }
+  .step .line {
+    position: absolute;
+    top: 6px;
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    background: var(--line);
+    z-index: 1;
+  }
+  .step:first-child .line { display: none; }
+  .step.done .line, .step.current .line { background: var(--maroon); }
+  .step .label { font-size: 10px; color: var(--muted); }
+  .step.done .label, .step.current .label { color: var(--ink); font-weight: 600; }
+
+  /* ---- Barkod şeridi (dekoratif, gerçek değil) ---- */
+  .barcode-strip {
+    margin: 18px 20px 20px;
+    padding: 14px 16px;
+    background: var(--paper-2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .barcode-bars {
+    flex: 1;
+    height: 32px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--ink) 0px, var(--ink) 2px,
+      transparent 2px, transparent 4px,
+      var(--ink) 4px, var(--ink) 5px,
+      transparent 5px, transparent 9px,
+      var(--ink) 9px, var(--ink) 12px,
+      transparent 12px, transparent 14px
+    );
+    opacity: 0.8;
+  }
+  .barcode-strip .code {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .empty {
+    text-align: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    padding: 60px 20px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topband">
+    <div class="topband-row">
+      <div class="brandmark">
+        <div class="glyph">✈</div>
+        <div class="name">Bagaj Takip</div>
+      </div>
+      <div class="badge-live" id="live-badge">canlı</div>
+    </div>
+    <h1>Bagajım Nerede?</h1>
+    <p>Anlık konumunuzu aşağıdan takip edin</p>
+  </div>
+
+  <div class="selector-wrap">
+    <div class="selector">
+      <label for="bag-select">Bagaj seç (demo)</label>
+      <select id="bag-select"></select>
+    </div>
+  </div>
+
+  <div class="content">
+    <div id="content-inner"></div>
+    <div id="empty" class="empty">Bir bagaj seçin.</div>
+  </div>
+</div>
+
+<script>
+  const CHECKPOINTS = ["check-in", "sorting", "loading", "arrival-unload", "carousel"];
+  const CHECKPOINT_LABELS = {
+    "check-in": "Check-in",
+    "sorting": "Ayrıştırma",
+    "loading": "Yükleme",
+    "arrival-unload": "İniş",
+    "carousel": "Bant",
+  };
+
+  // Yolcuya gösterilecek yumuşatılmış, güven verici mesajlar —
+  // teknik alert kodları (MISROUTED, MANUAL_FLAG) burada asla gösterilmez.
+  const SOFT_ALERT_MESSAGES = {
+    MISROUTED: "Bagajınızın rotasında küçük bir sapma tespit edildi, ekibimiz takip ediyor.",
+    MANUAL_FLAG: "Bagajınız ekibimiz tarafından özel olarak inceleniyor, endişelenmeyin.",
+  };
+
+  let bags = {};
+  let selectedTagId = null;
+
+  const selectEl = document.getElementById("bag-select");
+  const contentEl = document.getElementById("content-inner");
+  const emptyEl = document.getElementById("empty");
+  const liveBadge = document.getElementById("live-badge");
+
+  function fakeBarcode(tagId) {
+    return tagId.replace(/[^0-9]/g, "").padEnd(10, "0").slice(0, 10);
+  }
+
+  function renderJourney(bag) {
+    const currentIdx = bag.checkpoint ? CHECKPOINTS.indexOf(bag.checkpoint) : -1;
+    return CHECKPOINTS.map((cp, i) => {
+      let cls = "step";
+      if (i < currentIdx) cls += " done";
+      else if (i === currentIdx) cls += " done current";
+      return `
+        <div class="${cls}">
+          <div class="line"></div>
+          <div class="dot"></div>
+          <div class="label">${CHECKPOINT_LABELS[cp]}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderBanners(bag) {
+    let html = "";
+
+    if (bag.priority) {
+      html += `<div class="banner priority"><span class="icon">⭐</span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli olarak işleme alınıyor.</span></div>`;
+    }
+
+    const hasSlaMet = bag.alerts.some((a) => a.type === "SLA_MET");
+    if (hasSlaMet) {
+      html += `<div class="banner success"><span class="icon">✅</span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
+    }
+
+    const softAlertTypes = ["MISROUTED", "MANUAL_FLAG"];
+    const criticalAlert = [...bag.alerts].reverse().find((a) => softAlertTypes.includes(a.type));
+    if (criticalAlert) {
+      html += `<div class="banner soft-alert"><span class="icon">💬</span><span>${SOFT_ALERT_MESSAGES[criticalAlert.type]}</span></div>`;
+    }
+
+    return html;
+  }
+
+  function renderBag(bag) {
+    contentEl.innerHTML = `
+      ${renderBanners(bag)}
+      <div class="pass">
+        <div class="pass-top">
+          <div class="pass-tag">${bag.tagId}</div>
+          <div class="pass-name">${bag.passenger}</div>
+          <div class="pass-grid">
+            <div class="pass-field gold">
+              <div class="k">Uçuş</div>
+              <div class="v">${bag.flightId}</div>
+            </div>
+            <div class="pass-field">
+              <div class="k">Sınıf</div>
+              <div class="v">${bag.passengerClass}</div>
+            </div>
+            <div class="pass-field">
+              <div class="k">Durum</div>
+              <div class="v">${bag.checkpoint ? CHECKPOINT_LABELS[bag.checkpoint] : "Bekleniyor"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding: 0 20px;"><div class="perforation"></div></div>
+
+        <div class="journey-wrap">
+          <div class="journey-label">Yolculuk</div>
+          <div class="journey">${renderJourney(bag)}</div>
+        </div>
+
+        <div class="barcode-strip">
+          <div class="barcode-bars"></div>
+          <div class="code">${fakeBarcode(bag.tagId)}</div>
+        </div>
+      </div>
+    `;
+    emptyEl.style.display = "none";
+  }
+
+  function populateSelect() {
+    const sorted = Object.values(bags).sort((a, b) => a.tagId.localeCompare(b.tagId));
+    selectEl.innerHTML = sorted
+      .map((b) => `<option value="${b.tagId}">${b.tagId} — ${b.passenger} (${b.flightId})</option>`)
+      .join("");
+    if (sorted.length) {
+      selectedTagId = sorted[0].tagId;
+      selectEl.value = selectedTagId;
+      renderBag(bags[selectedTagId]);
+    }
+  }
+
+  selectEl.addEventListener("change", () => {
+    selectedTagId = selectEl.value;
+    renderBag(bags[selectedTagId]);
+  });
+
+  async function loadInitialBags() {
+    const res = await fetch("/api/bags", { headers: { "x-api-key": "demo-havayolu-key-123" } });
+    const list = await res.json();
+    bags = Object.fromEntries(list.map((b) => [b.tagId, b]));
+    populateSelect();
+  }
+
+  function connectWebSocket() {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    const ws = new WebSocket(`${proto}://${location.host}`);
+
+    ws.onopen = () => { liveBadge.textContent = "canlı"; liveBadge.style.opacity = 1; };
+    ws.onclose = () => {
+      liveBadge.textContent = "bağlantı koptu";
+      liveBadge.style.opacity = 0.6;
+      setTimeout(connectWebSocket, 2000);
+    };
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === "event") {
+        bags[msg.bag.tagId] = msg.bag;
+        if (msg.bag.tagId === selectedTagId) renderBag(msg.bag);
+      } else if (msg.type === "reset") {
+        loadInitialBags();
+      }
+    };
+  }
+
+  loadInitialBags();
+  connectWebSocket();
+</script>
+</body>
+</html>
