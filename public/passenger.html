@@ -39,7 +39,7 @@
   }
   .wrap { width: 100%; max-width: 430px; }
 
-  /* ---- Üst bant ---- */
+  /* Üst bant */
   .topband {
     background: linear-gradient(160deg, var(--maroon) 0%, var(--maroon-deep) 100%);
     padding: 22px 22px 30px;
@@ -111,7 +111,7 @@
     z-index: 1;
   }
 
-  /* ---- Bagaj seçici ---- */
+  /* Bagaj seçici */
   .selector-wrap {
     margin: -16px 16px 0;
     position: relative;
@@ -146,7 +146,7 @@
 
   .content { padding: 18px 16px 0; }
 
-  /* ---- Banner'lar ---- */
+  /*  Banner'lar  */
   .banner {
     border-radius: 10px;
     padding: 12px 14px;
@@ -162,7 +162,7 @@
   .banner.success { background: var(--green-bg); color: #2b5c41; border: 1px solid #c7e4d4; }
   .banner.soft-alert { background: var(--soft-alert-bg); color: var(--soft-alert); border: 1px solid #f0d2bd; }
 
-  /* ---- Biniş kartı stili ana kart ---- */
+  /* Biniş kartı stili ana kart */
   .pass {
     background: var(--paper);
     border-radius: 16px;
@@ -204,7 +204,7 @@
   }
   .pass-field.gold .v { color: var(--maroon); }
 
-  /* ---- Perforasyon / ayraç ---- */
+  /* ayraç */
   .perforation {
     position: relative;
     height: 0;
@@ -223,7 +223,7 @@
   .perforation::before { left: -9px; }
   .perforation::after { right: -9px; }
 
-  /* ---- Yolculuk / checkpoint ---- */
+  /*  Yolculuk / checkpoint */
   .journey-wrap { padding: 20px 20px 8px; }
   .journey-label {
     font-size: 10.5px;
@@ -260,7 +260,7 @@
   .step .label { font-size: 10px; color: var(--muted); }
   .step.done .label, .step.current .label { color: var(--ink); font-weight: 600; }
 
-  /* ---- Barkod şeridi (dekoratif, gerçek değil) ---- */
+  /* Barkod şeridi (dekoratif, gerçek değil) */
   .barcode-strip {
     margin: 18px 20px 20px;
     padding: 14px 16px;
@@ -337,7 +337,6 @@
     "carousel": "Bant",
   };
 
-  // Yolcuya gösterilecek yumuşatılmış, güven verici mesajlar —
   // teknik alert kodları (MISROUTED, MANUAL_FLAG) burada asla gösterilmez.
   const SOFT_ALERT_MESSAGES = {
     MISROUTED: "Bagajınızın rotasında küçük bir sapma tespit edildi, ekibimiz takip ediyor.",
@@ -376,18 +375,18 @@
     let html = "";
 
     if (bag.priority) {
-      html += `<div class="banner priority"><span class="icon">⭐</span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli olarak işleme alınıyor.</span></div>`;
+      html += `<div class="banner priority"><span class="icon"></span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli olarak işleme alınıyor.</span></div>`;
     }
 
     const hasSlaMet = bag.alerts.some((a) => a.type === "SLA_MET");
     if (hasSlaMet) {
-      html += `<div class="banner success"><span class="icon">✅</span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
+      html += `<div class="banner success"><span class="icon"></span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
     }
 
     const softAlertTypes = ["MISROUTED", "MANUAL_FLAG"];
     const criticalAlert = [...bag.alerts].reverse().find((a) => softAlertTypes.includes(a.type));
     if (criticalAlert) {
-      html += `<div class="banner soft-alert"><span class="icon">💬</span><span>${SOFT_ALERT_MESSAGES[criticalAlert.type]}</span></div>`;
+      html += `<div class="banner soft-alert"><span class="icon"></span><span>${SOFT_ALERT_MESSAGES[criticalAlert.type]}</span></div>`;
     }
 
     return html;
