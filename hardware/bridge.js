@@ -10,7 +10,7 @@
 //   SERIAL_PATH=/dev/tty.usbserial-XXX npm start
 //
 // Port ismini bulmak için: ls /dev/tty.*  (Mac'te genelde "usbserial-..."
-// ile başlar, cihaza göre değişir — örn. daha önce "usbserial-110" çıkmıştı)
+// ile başlar, cihaza göre değişir.
 //
 // İsteğe bağlı ortam değişkenleri:
 //   API_URL     -> varsayılan http://localhost:3000/api/sensor-event
