@@ -127,6 +127,39 @@ yayınlanır.
 
 ---
 
+---
+
+### `POST /api/seed`
+
+Demo/sunum amaçlı: gerçek bir uçuştaki gibi çok sayıda (varsayılan 100,
+maksimum 500) rastgele yolcu/bagaj üretip standart 6 bagajlık demo
+manifest'inin yerine geçici olarak yükler. Sensör simülatöründeki
+`realistic-100` senaryosu bu endpoint'i kullanır.
+
+**Header'lar:** `Content-Type: application/json`, `x-api-key: ...`
+
+**Body**
+```json
+{ "count": 100, "flightId": "TK1982" }
+```
+
+| Alan | Tip | Zorunlu | Açıklama |
+|---|---|---|---|
+| `count` | number | hayır | Üretilecek bagaj sayısı (1–500). Boş/0 gönderilirse standart 6 bagajlık demo manifest'ine geri döner |
+| `flightId` | string | hayır | Üretilen tüm bagajların atanacağı uçuş. Varsayılan `TK1982` |
+
+**Yanıt — `200 OK`**
+```json
+{ "ok": true, "count": 100, "flightId": "TK1982" }
+```
+
+Standart demo manifest'ine dönmek için:
+```json
+{}
+```
+
+---
+
 ### `POST /api/webhooks`
 
 Havayolunun kendi backend'inin, her yeni alarmda push bildirimi alacağı bir

@@ -1,4 +1,4 @@
-#  Bagaj Takip Sistemi
+# 🧳 Bagaj Takip Sistemi
 
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white)
@@ -86,6 +86,7 @@ node sensor-simulator.js missed-sla    # dürüst raporlama: bir bagaj SLA'yı k
 node sensor-simulator.js multi-flight  # iki uçuş paralel akıyor
 node sensor-simulator.js edge-cases    # tekrar okuma / kayıtsız etiket / checkpoint atlama / kayıp bagaj
 node sensor-simulator.js stress        # kısa sürede yoğun trafik
+node sensor-simulator.js realistic-100 # ~100 yolcu, gerçek bir uçuş gibi (birkaç dakika sürer)
 ```
 
 Temiz başlamak için:
@@ -95,9 +96,9 @@ curl -X POST http://localhost:3000/api/reset -H "x-api-key: demo-havayolu-key-12
 
 ## Donanım Durumu
 
--  HC-SR04 ultrasonik mesafe sensörü Arduino ile test edildi, `bridge.js`
+- ✅ HC-SR04 ultrasonik mesafe sensörü Arduino ile test edildi, `bridge.js`
   üzerinden backend'e canlı event gönderiyor.
--  RC522 (NFC/RFID okuyucu) ile gerçek etiket kimlikleri kullanan bir
+- 🔜 RC522 (NFC/RFID okuyucu) ile gerçek etiket kimlikleri kullanan bir
   versiyona geçiş planlanıyor.
 
 Donanım kurulumu için `hardware/` klasörüne bakın.
