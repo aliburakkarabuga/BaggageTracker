@@ -44,6 +44,51 @@ const MANIFEST = [
   { tagId: "TAG-4402", passenger: "C. Arslan", flightId: "TK1984", passengerClass: "economy" },
 ];
 
+// Aktif manifest — normalde sabit demo manifest'i, ama /api/seed ile büyük
+// ölçekli (örn. 100 yolcu) bir uçuş simüle etmek için geçici olarak
+// değiştirilebilir. resetBagsToInitial() her zaman BUNU okur.
+let currentManifest = MANIFEST;
+
+// ---------------------------------------------------------------------------
+// Büyük ölçekli manifest üretimi (/api/seed için) — gerçek bir uçuştaki gibi
+// çok sayıda yolcu/bagaj simüle etmek için rastgele isim ve sınıf üretir.
+// ---------------------------------------------------------------------------
+
+const FIRST_INITIALS = ["A", "B", "C", "D", "E", "F", "G", "H", "İ", "K", "L", "M", "N", "O", "P", "R", "S", "T", "U", "Y", "Z"];
+const LAST_NAMES = [
+  "Kaya", "Demir", "Yıldız", "Aydın", "Şahin", "Arslan", "Çelik", "Doğan", "Kılıç", "Aksoy",
+  "Yıldırım", "Öztürk", "Polat", "Aslan", "Çetin", "Koç", "Kurt", "Özdemir", "Şen", "Uçar",
+  "Ateş", "Bulut", "Ergün", "Güneş", "Karaca", "Kaplan", "Duman", "Ekinci", "Toprak", "Yavuz",
+];
+
+function randomPassengerName() {
+  const initial = FIRST_INITIALS[Math.floor(Math.random() * FIRST_INITIALS.length)];
+  const lastName = LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)];
+  return `${initial}. ${lastName}`;
+}
+
+// Gerçek bir uçuştaki gibi kaba bir sınıf dağılımı: çoğunluk economy,
+// bir kısım business, az bir kısım first.
+function randomPassengerClass() {
+  const r = Math.random();
+  if (r < 0.72) return "economy";
+  if (r < 0.92) return "business";
+  return "first";
+}
+
+function generateBulkManifest(count, flightId) {
+  const entries = [];
+  for (let i = 1; i <= count; i++) {
+    entries.push({
+      tagId: `TAG-9${String(i).padStart(4, "0")}`, // TAG-90001, TAG-90002, ... — demo manifest'iyle çakışmaz
+      passenger: randomPassengerName(),
+      flightId,
+      passengerClass: randomPassengerClass(),
+    });
+  }
+  return entries;
+}
+
 /** @type {Map<string, object>} */
 const bags = new Map();
 
@@ -65,7 +110,7 @@ function freshBag(manifestEntry) {
 
 function resetBagsToInitial() {
   bags.clear();
-  for (const entry of MANIFEST) {
+  for (const entry of currentManifest) {
     bags.set(entry.tagId, freshBag(entry));
   }
 }
@@ -305,6 +350,28 @@ app.post("/api/reset", requireApiKey, (req, res) => {
   persistState();
   broadcast({ type: "reset" });
   res.json({ ok: true });
+});
+
+// Büyük ölçekli simülasyon: gerçek bir uçuştaki gibi çok sayıda (örn. 100)
+// yolcunun bagajını üretir ve sisteme yükler. count verilmezse (ya da 0/boş
+// gönderilirse) standart 6 bagajlık demo manifest'ine geri döner.
+app.post("/api/seed", requireApiKey, (req, res) => {
+  const { count, flightId } = req.body || {};
+
+  if (!count) {
+    currentManifest = MANIFEST;
+    resetBagsToInitial();
+    persistState();
+    broadcast({ type: "reset" });
+    return res.json({ ok: true, count: currentManifest.length, restored: "default" });
+  }
+
+  const n = Math.max(1, Math.min(500, Number(count) || 0));
+  currentManifest = generateBulkManifest(n, flightId || "TK1982");
+  resetBagsToInitial();
+  persistState();
+  broadcast({ type: "reset" });
+  res.json({ ok: true, count: currentManifest.length, flightId: flightId || "TK1982" });
 });
 
 // Basit webhook kaydı (spesifikasyonda "kayıtlı webhook'lar" geçtiği için
