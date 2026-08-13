@@ -168,12 +168,67 @@
     cursor: pointer;
   }
   .flag-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* ---- Görünüm sekmeleri (Bagajlar / Uçuş Özeti) ---- */
+  .view-tabs { display: flex; gap: 4px; background: var(--panel-2); border-radius: 8px; padding: 3px; }
+  .view-tab {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+  }
+  .view-tab.active { background: var(--accent); color: white; }
+
+  /* ---- Uçuş özeti kartları ---- */
+  .flight-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .flight-card-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .flight-card-top .fid { font-size: 17px; font-weight: 700; }
+  .flight-card-top .count { font-size: 12px; color: var(--muted); }
+
+  .flight-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .fstat { background: var(--panel-2); border-radius: 8px; padding: 8px 10px; }
+  .fstat .k { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .fstat .v { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .fstat.warn .v { color: var(--amber); }
+  .fstat.crit .v { color: var(--red); }
+  .fstat.ok .v { color: var(--green); }
+
+  .flight-progress { display: flex; gap: 3px; }
+  .flight-progress .seg { flex: 1; height: 8px; border-radius: 4px; background: var(--border); }
+  .flight-progress .seg.done { background: var(--accent); }
+  .flight-progress-label { font-size: 10.5px; color: var(--muted); }
+
+  .flight-critical-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .flight-critical-list .chip {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(248, 81, 73, 0.12);
+    color: var(--red);
+    border: 1px solid rgba(248, 81, 73, 0.35);
+  }
 </style>
 </head>
 <body>
 <header>
   <div class="header-left">
-    <h1> Bagaj Takip / Operasyon Paneli</h1>
+    <h1>🧳 Bagaj Takip / Operasyon Paneli</h1>
+    <div class="view-tabs">
+      <button class="view-tab active" id="tab-bags" onclick="switchView('bags')">Bagajlar</button>
+      <button class="view-tab" id="tab-flights" onclick="switchView('flights')">Uçuş Özeti</button>
+    </div>
   </div>
   <div class="header-right">
     <a class="link" href="/passenger.html" target="_blank">yolcu ekranını gör →</a>
@@ -187,6 +242,7 @@
 
 <div class="layout">
   <main id="cards"></main>
+  <main id="flight-summary" style="display: none;"></main>
   <aside>
     <h2>Canlı Olay Akışı</h2>
     <div id="feed"><div class="feed-empty">Henüz olay yok.</div></div>
@@ -204,8 +260,10 @@
   };
 
   let bags = {};
+  let currentView = "bags";
 
   const cardsEl = document.getElementById("cards");
+  const flightSummaryEl = document.getElementById("flight-summary");
   const feedEl = document.getElementById("feed");
   const connDot = document.getElementById("conn-dot");
   const connText = document.getElementById("conn-text");
@@ -254,6 +312,83 @@
   function renderAllCards() {
     const sorted = Object.values(bags).sort((a, b) => a.tagId.localeCompare(b.tagId));
     cardsEl.innerHTML = sorted.map(renderCard).join("");
+  }
+
+  function switchView(view) {
+    currentView = view;
+    document.getElementById("tab-bags").classList.toggle("active", view === "bags");
+    document.getElementById("tab-flights").classList.toggle("active", view === "flights");
+    cardsEl.style.display = view === "bags" ? "grid" : "none";
+    flightSummaryEl.style.display = view === "flights" ? "grid" : "none";
+    if (view === "flights") renderFlightSummary();
+  }
+  window.switchView = switchView;
+
+  function computeFlightSummaries() {
+    const byFlight = {};
+    for (const bag of Object.values(bags)) {
+      if (!byFlight[bag.flightId]) {
+        byFlight[bag.flightId] = {
+          flightId: bag.flightId,
+          bags: [],
+          checkpointCounts: Object.fromEntries(CHECKPOINTS.map((cp) => [cp, 0])),
+          notStarted: 0,
+          slaMet: 0,
+          slaMissed: 0,
+          criticalBags: [],
+        };
+      }
+      const f = byFlight[bag.flightId];
+      f.bags.push(bag);
+      if (bag.checkpoint) f.checkpointCounts[bag.checkpoint]++;
+      else f.notStarted++;
+      if (bag.alerts.some((a) => a.type === "SLA_MET")) f.slaMet++;
+      if (bag.alerts.some((a) => a.type === "SLA_MISSED")) f.slaMissed++;
+      if (bag.alerts.some((a) => ["MISROUTED", "MANUAL_FLAG"].includes(a.type))) {
+        f.criticalBags.push(bag.tagId);
+      }
+    }
+    return Object.values(byFlight).sort((a, b) => a.flightId.localeCompare(b.flightId));
+  }
+
+  function renderFlightCard(f) {
+    const atCarousel = f.checkpointCounts["carousel"];
+    const progressSegs = CHECKPOINTS.map((cp) => {
+      const doneCount = f.bags.filter((b) => b.checkpoint && CHECKPOINTS.indexOf(b.checkpoint) >= CHECKPOINTS.indexOf(cp)).length;
+      const cls = doneCount === f.bags.length ? "seg done" : doneCount > 0 ? "seg done" : "seg";
+      return `<div class="${cls}" style="opacity: ${f.bags.length ? Math.max(0.25, doneCount / f.bags.length) : 0.25}"></div>`;
+    }).join("");
+
+    const criticalChips = f.criticalBags.length
+      ? `<div class="flight-critical-list">${f.criticalBags.map((t) => `<span class="chip">${t}</span>`).join("")}</div>`
+      : "";
+
+    return `
+      <div class="flight-card">
+        <div class="flight-card-top">
+          <div class="fid">${f.flightId}</div>
+          <div class="count">${f.bags.length} bagaj</div>
+        </div>
+
+        <div class="flight-stats">
+          <div class="fstat"><div class="k">Bantta</div><div class="v">${atCarousel}/${f.bags.length}</div></div>
+          <div class="fstat ${f.slaMissed ? "warn" : "ok"}"><div class="k">SLA</div><div class="v">${f.slaMet}✓ / ${f.slaMissed}✗</div></div>
+          <div class="fstat ${f.criticalBags.length ? "crit" : ""}"><div class="k">Kritik</div><div class="v">${f.criticalBags.length}</div></div>
+        </div>
+
+        <div>
+          <div class="flight-progress">${progressSegs}</div>
+          <div class="flight-progress-label">check-in → sorting → loading → iniş → bant</div>
+        </div>
+
+        ${criticalChips}
+      </div>
+    `;
+  }
+
+  function renderFlightSummary() {
+    const summaries = computeFlightSummaries();
+    flightSummaryEl.innerHTML = summaries.map(renderFlightCard).join("");
   }
 
   function flashCard(tagId) {
@@ -312,6 +447,7 @@
       if (msg.type === "event") {
         bags[msg.bag.tagId] = msg.bag;
         renderAllCards();
+        if (currentView === "flights") renderFlightSummary();
         flashCard(msg.bag.tagId);
         prependFeed(msg.bag);
       } else if (msg.type === "reset") {
