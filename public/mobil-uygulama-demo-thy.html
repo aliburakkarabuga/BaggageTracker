@@ -259,18 +259,18 @@
           </div>
 
           <div class="menu">
-            <div class="menu-item"><span class="emoji">🎫</span><span>Biniş Kartı</span><span class="chev">›</span></div>
-            <div class="menu-item"><span class="emoji">🪑</span><span>Koltuk Değiştir</span><span class="chev">›</span></div>
-            <div class="menu-item"><span class="emoji">🍽️</span><span>İkram Seçimi</span><span class="chev">›</span></div>
+            <div class="menu-item"><span class="emoji"></span><span>Biniş Kartı</span><span class="chev">›</span></div>
+            <div class="menu-item"><span class="emoji"></span><span>Koltuk Değiştir</span><span class="chev">›</span></div>
+            <div class="menu-item"><span class="emoji"></span><span>İkram Seçimi</span><span class="chev">›</span></div>
           </div>
 
           <div class="bottom-nav">
-            <div class="nav-item active"><span class="nav-emoji">🏠</span><span>Ana Sayfa</span></div>
-            <div class="nav-item"><span class="nav-emoji">🎫</span><span>Uçuş Durumu</span></div>
-            <div class="nav-item"><span class="nav-emoji">🛄</span><span>Bagaj Bırakma</span></div>
+            <div class="nav-item active"><span class="nav-emoji"></span><span>Ana Sayfa</span></div>
+            <div class="nav-item"><span class="nav-emoji"></span><span>Uçuş Durumu</span></div>
+            <div class="nav-item"><span class="nav-emoji"></span><span>Bagaj Bırakma</span></div>
             <div class="nav-item highlight" onclick="showScreen('bag')">
               <span class="badge-new">YENİ</span>
-              <span class="nav-emoji">🧳</span><span>Bagajım Nerede?</span>
+              <span class="nav-emoji"></span><span>Bagajım Nerede?</span>
             </div>
           </div>
         </div>
@@ -327,14 +327,14 @@
   function renderBanners(bag) {
     let html = "";
     if (bag.priority) {
-      html += `<div class="banner priority"><span>⭐</span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli işleniyor.</span></div>`;
+      html += `<div class="banner priority"><span></span><span><strong>Öncelikli Hizmet</strong><br>Bagajınız öncelikli işleniyor.</span></div>`;
     }
     if (bag.alerts.some((a) => a.type === "SLA_MET")) {
-      html += `<div class="banner success"><span>✅</span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
+      html += `<div class="banner success"><span></span><span>Bagajınız hedeflenen sürede banda ulaştı.</span></div>`;
     }
     const critical = [...bag.alerts].reverse().find((a) => ["MISROUTED", "MANUAL_FLAG"].includes(a.type));
     if (critical) {
-      html += `<div class="banner soft-alert"><span>💬</span><span>${SOFT_ALERT_MESSAGES[critical.type]}</span></div>`;
+      html += `<div class="banner soft-alert"><span></span><span>${SOFT_ALERT_MESSAGES[critical.type]}</span></div>`;
     }
     return html;
   }
